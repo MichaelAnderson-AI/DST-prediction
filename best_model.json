@@ -1,0 +1,11 @@
+{
+    "model_type": "RECENT",
+    "window_size": 24,
+    "learning_rate": 0.001,
+    "batch_size": 128,
+    "fold": 2,
+    "best_val_loss": 304.23525078053376,
+    "mae": 12.110438346862793,
+    "epochs_trained": 6,
+    "model_weights": "best_model_RECENT_window24_lr0.001_batch128_fold2.pth"
+}
