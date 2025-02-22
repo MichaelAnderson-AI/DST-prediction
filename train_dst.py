@@ -389,9 +389,15 @@ def train_with_sliding_window(data, window_size, train_window_size, val_window_s
         print(f"Saving the best model with validation loss: {best_metric_value:.4f}")
         torch.save(best_model, f"best_model.pth")
 
+        # Convert float32 values to standard Python float
+        best_model_info_serializable = {
+            key: float(value) if isinstance(value, np.float32) else value
+            for key, value in best_model_info.items()
+        }
+
         # Save the best model information in a JSON file
         with open("best_model.json", 'w') as f:
-            json.dump(best_model_info, f, indent=4)
+            json.dump(best_model_info_serializable, f, indent=4)
         
         print(f"Best model information saved to best_model.json")
     
