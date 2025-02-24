@@ -1,0 +1,11 @@
+{
+    "model_type": "CNN1D",
+    "window_size": 168,
+    "learning_rate": 0.0001,
+    "batch_size": 512,
+    "fold": 0,
+    "best_val_loss": 13.68359893421794,
+    "mae": 2.455862045288086,
+    "epochs_trained": 35,
+    "model_weights": "best_model_CNN1D_window168_lr0.0001_batch512_fold0.pth"
+}

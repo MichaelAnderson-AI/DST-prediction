@@ -153,19 +153,24 @@ class CNN1D_Model(nn.Module):
         self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=16, kernel_size=3, padding=1)
         self.conv2 = nn.Conv1d(in_channels=16, out_channels=32, kernel_size=3, padding=1)
         self.conv3 = nn.Conv1d(in_channels=32, out_channels=64, kernel_size=3, padding=1)
+        self.conv4 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3, padding=1)
         self.pool = nn.MaxPool1d(kernel_size=2, stride=2)
         self.global_avg_pool = nn.AdaptiveAvgPool1d(1)  # Global Average Pooling
-        self.fc = nn.Linear(64, output_size)  # Drastically reduced parameters
+        self.fc1 = nn.Linear(128, 32)  # Drastically reduced parameters
+        self.fc2 = nn.Linear(32, output_size)  # Drastically reduced parameters
         self.dropout = nn.Dropout(0.3)
 
     def forward(self, x):
         x = self.pool(torch.relu(self.conv1(x)))  
         x = self.pool(torch.relu(self.conv2(x)))  
         x = self.pool(torch.relu(self.conv3(x)))  
+        x = self.pool(torch.relu(self.conv4(x)))  
         x = self.global_avg_pool(x)  # Global Average Pooling reduces feature map to size [batch, channels, 1]
         x = x.view(x.size(0), -1)  # Flatten for FC layer
         x = self.dropout(x)
-        x = self.fc(x)  
+        x = self.fc1(x)  
+        x = self.dropout(x)
+        x = self.fc2(x)  
         return x  
 
 # LSTMAttentionLSTM Model Definition
@@ -256,7 +261,7 @@ def load_checkpoint(model, optimizer, model_type, fold, window_size, lr, batch_s
         print(f"No checkpoint found for {model_type} at fold {fold + 1}. Starting from scratch.")
         return model, optimizer, 0, None, None, float('inf')
 
-def train_with_sliding_window(data, window_size, train_window_size, val_window_size, lr=1e-3, batch_size=64, num_epochs=100, model_type="LSTM"):
+def train_with_sliding_window(data, window_size, train_window_size, val_window_size, lr=1e-3, batch_size=64, num_epochs=1000, model_type="LSTM"):
     splits = sliding_window_split(data, train_window_size, val_window_size)
 
     val_losses = []
@@ -416,7 +421,7 @@ def train_with_sliding_window(data, window_size, train_window_size, val_window_s
     writer.close()
 
 # number of fold
-num_fold = 3
+num_fold = 1
 val_window_size = len(dst_values) // (8 + 2 * num_fold) * 2  # Size of validation window
 train_window_size = val_window_size * 4  # Size of training window, train: 80%, val: 20% of each fold
 
@@ -442,7 +447,7 @@ batch_sizes = {
     "LSTM_ATTENTION_LSTM": [512, 64],    
 }
 # Model List
-model_list = ["RECENT", "LSTM_GRU", "CNN1D", "LSTM_ATTENTION_LSTM"]
+model_list = ["CNN1D", "LSTM_ATTENTION_LSTM", "RECENT", "LSTM_GRU"]
 
 for model_type in model_list:
     for lr in learning_rates[model_type]:
